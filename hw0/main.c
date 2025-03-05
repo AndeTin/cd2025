@@ -2,13 +2,11 @@
 #include<stdlib.h>
 #include<string.h>
 
-// Define the hash table entry structure
 typedef struct hashEntry {
     char character;
     int frequency;
 } hashEntry;
 
-// Define the hash table structure
 typedef struct hashTable {
     hashEntry* table[256];
 } hashTable;
@@ -28,7 +26,6 @@ Node* createNode(char character) {
     return newNode;
 }
 
-// Function to append a node to the linked list
 void appendNode(Node** head, char character) {
     Node* newNode = createNode(character);
     if (*head == NULL) {
@@ -42,7 +39,6 @@ void appendNode(Node** head, char character) {
     last->next = newNode;
 }
 
-// Function to add frequency to an existing node
 void addFrequency(Node* head, char character) {
     Node* current = head;
     while (current != NULL) {
@@ -54,7 +50,6 @@ void addFrequency(Node* head, char character) {
     }
 }
 
-// Function to print the linked list
 void printList(Node* head) {
     Node* current = head;
     while (current != NULL) {
@@ -67,7 +62,6 @@ void printList(Node* head) {
     }
 }
 
-// Function to free the linked list
 void freeList(Node* head) {
     Node* current = head;
     Node* next;
@@ -78,7 +72,6 @@ void freeList(Node* head) {
     }
 }
 
-// Function to search the linked list
 void searchList(Node* head, char character) {
     Node* current = head;
     while (current != NULL && current->next != NULL) {
@@ -95,7 +88,6 @@ void searchList(Node* head, char character) {
     }
 }
 
-// Function to create a hash table
 hashTable* createHashTable() {
     hashTable* newTable = (hashTable*)malloc(sizeof(hashTable));
     for (int i = 0; i < 256; i++) {
@@ -104,12 +96,10 @@ hashTable* createHashTable() {
     return newTable;
 }
 
-// Hash function to map characters to indices
 unsigned int hashFunction(char character) {
     return (unsigned int)character % 256;
 }
 
-// Function to insert or update a character in the hash table
 void insertOrUpdate(hashTable* table, char character) {
     unsigned int index = hashFunction(character);
     if (table->table[index] == NULL) {
@@ -121,7 +111,6 @@ void insertOrUpdate(hashTable* table, char character) {
     }
 }
 
-// Function to print the hash table
 void printHashTable(hashTable* table) {
     for (int i = 0; i < 256; i++) {
         if (table->table[i] != NULL) {
@@ -134,7 +123,6 @@ void printHashTable(hashTable* table) {
     }
 }
 
-// Function to read a file and update the linked list and hash table
 void readFile(const char* filename, Node** head, hashTable* table) {
     FILE* fp = fopen(__FILE__, "r");
     if (fp == NULL) {
@@ -156,13 +144,12 @@ void readFile(const char* filename, Node** head, hashTable* table) {
 int main() {
     Node* head = NULL;
     hashTable* table = createHashTable();
-    readFile(__FILE__, &head, table); // Specify your file name here
+    readFile(__FILE__, &head, table);
     printf("Using sequential search: O(n)\n");
     printList(head);
     printf("\nUsing hash table: O(1) average time complexity\n");
     printHashTable(table);
 
-    // Free allocated memory
     freeList(head);
     for (int i = 0; i < 256; i++) {
         if (table->table[i] != NULL) {
