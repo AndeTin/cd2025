@@ -124,7 +124,7 @@ void printHashTable(hashTable* table) {
 }
 
 void readFile(const char* filename, Node** head, hashTable* table) {
-    FILE* fp = fopen(__FILE__, "r");
+    FILE* fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Failed to open file\n");
         return;
@@ -150,6 +150,27 @@ int main() {
     printf("\nUsing hash table: O(1) average time complexity\n");
     printHashTable(table);
 
+    while (1) {
+        char input[10]; // Buffer to handle special characters like \n
+        printf("Enter a character to search for (Ctrl + c to quit): ");
+        fgets(input, sizeof(input), stdin); // Use fgets to read the input including newline characters
+
+        // Handle newline character input
+        if (strcmp(input, "\n") == 0) {
+            printf("\\n : %d\n", table->table[hashFunction('\n')]->frequency);
+            continue;
+        }
+
+        // Handle other characters
+        char searchChar = input[0];
+        unsigned int index = hashFunction(searchChar);
+        if (table->table[index] != NULL && table->table[index]->character == searchChar) {
+            printf("%c : %d\n", table->table[index]->character, table->table[index]->frequency);
+        } else {
+            printf("Character not found\n");
+        }
+    }
+
     freeList(head);
     for (int i = 0; i < 256; i++) {
         if (table->table[i] != NULL) {
@@ -160,3 +181,4 @@ int main() {
 
     return 0;
 }
+
