@@ -43,6 +43,11 @@ void addFrequency(Node* head, char character) {
 void printList(Node* head) {
     Node* current = head;
     while(current != NULL) {
+        if(current->character == '\n') {
+            printf("\\n : %d\n", current->frequency);
+            current = current->next;
+            continue;
+        }
         printf("%c : %d\n", current->character, current->frequency);
         current = current->next;
     }
