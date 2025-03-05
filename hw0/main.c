@@ -2,6 +2,15 @@
 #include<stdlib.h>
 #include<string.h>
 
+typedef struct hashEntry {
+    char character;
+    int frequency;
+} hashEntry;
+
+typedef struct hashTable {
+    hashEntry* table[256];
+} hashTable;
+
 typedef struct Node{
     char character;
     int frequency;
@@ -79,7 +88,48 @@ void searchList(Node* head, char character) {
     }
 }
 
-void readFile(const char* filename, Node** head) {
+hashTable* createHashTable() {
+    hashTable* newTable = (hashTable*)malloc(sizeof(hashTable));
+    for(int i = 0; i < 256; i++) {
+        newTable->table[i] = NULL;
+    }
+    return newTable;
+}
+
+unsigned int hashFunction(char character) {
+    return (unsigned int)character % 256;
+}
+
+void insertOrUpdate(hashTable* table, char character) {
+    unsigned int index = hashFunction(character);
+    if(table->table[index] == NULL) {
+        table->table[index] = (hashEntry*)malloc(sizeof(hashEntry));
+        table->table[index]->character = character;
+        table->table[index]->frequency = 1;
+    } else {
+        if (table->table[index]->character == character) {
+            table->table[index]->frequency++;
+        } else {
+            // Handle collision: use separate chaining, open addressing, etc.
+            // For simplicity, let's ignore collisions here.
+            printf("Hash collision detected at index %d for character %c\n", index, character);
+        }
+    }
+}
+
+void printHashTable(hashTable* table) {
+    for (int i = 0; i < 256; i++) {
+        if (table->table[i] != NULL) {
+            if (table->table[i]->character == '\n') {
+                printf("\\n : %d\n", table->table[i]->frequency);
+            } else {
+                printf("%c : %d\n", table->table[i]->frequency);
+            }
+        }
+    }
+}
+
+void readFile(const char* filename, Node** head, hashTable* table) {
     FILE* fp = fopen(filename, "r");
     if(fp == NULL) {
         printf("Failed to open file\n");
@@ -92,14 +142,28 @@ void readFile(const char* filename, Node** head) {
         } else {
             searchList(*head, character);
         }
+        insertOrUpdate(table, character);
     }
     fclose(fp);
 }
 
 int main() {
     Node* head = NULL;
-    readFile(__FILE__, &head);
+    hashTable* table = createHashTable();
+    readFile(__FILE__, &head, table);
+    printf("Using sequential search: O(n)\n");
     printList(head);
+    printf("\nUsing hash table: O(1) average time complexity\n");
+    printHashTable(table);
+
+    // Free allocated memory
     freeList(head);
+    for (int i = 0; i < 256; i++) {
+        if (table->table[i] != NULL) {
+            free(table->table[i]);
+        }
+    }
+    free(table);
+
     return 0;
 }
