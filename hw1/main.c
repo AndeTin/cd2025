@@ -1,11 +1,16 @@
 #include <stdio.h>
+#include <regex.h> // <=== Old Code Reference: Regex library for pattern matching
 #include <string.h>
 
 #define MAX_INPUT_SIZE 1000
 #define MAX_TOKEN_LENGTH 100
 
-// Recognized token types as strings
+// === Old Code Reference ===
+// Recognized token types as strings are updated for new functionality, while still retaining compatibility with the old classification system.
 const char *TOKEN_TYPE[] = {
+    "DATE_PATTERN",   // From old code
+    "PHONE_PATTERN",  // From old code
+    "MONEY_PATTERN",  // From old code
     "TYPE_TOKEN",
     "MAIN_TOKEN",
     "LEFTPAREN_TOKEN",
@@ -29,8 +34,12 @@ const char *TOKEN_TYPE[] = {
     "UNKNOWN_TOKEN"
 };
 
-// Token type enumeration
+// === TokenType Enumeration (Enhanced but compatible with Old Code) ===
+// Retains UNKNOWN from the old code and adds new types for broader functionality
 typedef enum {
+    DATE_PATTERN,  // From old code
+    PHONE_PATTERN, // From old code
+    MONEY_PATTERN, // From old code
     TYPE,
     MAIN,
     LEFTPAREN,
@@ -54,42 +63,47 @@ typedef enum {
     UNKNOWN
 } TokenType;
 
-// Check if the string is a keyword and map to the correct token type
-TokenType classify_token(const char *token) {
-    if (strcmp(token, "int") == 0) return TYPE;
-    if (strcmp(token, "main") == 0) return MAIN;
-    if (strcmp(token, "if") == 0) return IF;
-    if (strcmp(token, "else") == 0) return ELSE;
-    if (strcmp(token, "while") == 0) return WHILE;
-    if (strcmp(token, "==") == 0) return EQUAL;
-    if (strcmp(token, ">=") == 0) return GREATEREQUAL;
-    if (strcmp(token, "<=") == 0) return LESSEQUAL;
-    if (strcmp(token, ">") == 0) return GREATER;
-    if (strcmp(token, "<") == 0) return LESS;
-    if (strcmp(token, "+") == 0) return PLUS;
-    if (strcmp(token, "-") == 0) return MINUS;
-    if (strcmp(token, "=") == 0) return ASSIGN;
-    if (strcmp(token, ";") == 0) return SEMICOLON;
-    if (strcmp(token, "(") == 0) return LEFTPAREN;
-    if (strcmp(token, ")") == 0) return RIGHTPAREN;
-    if (strcmp(token, "{") == 0) return LEFTBRACE;
-    if (strcmp(token, "}") == 0) return RIGHTBRACE;
+// === Old Code Reference ===
+// Function to match patterns using regex. This is directly from the old code with no changes.
+TokenType match_pattern(const char *pattern, const char *text) {
+    regex_t regex;
+    int result;
 
-    // Check if token is numeric (integer literal)
-    int is_numeric = 1;
-    for (int i = 0; token[i] != '\0'; i++) {
-        if (token[i] < '0' || token[i] > '9') {
-            is_numeric = 0;
-            break;
-        }
+    // Compile the regex
+    result = regcomp(&regex, pattern, REG_EXTENDED);
+    if (result) {
+        printf("Could not compile regex\n");
+        return UNKNOWN;
     }
-    if (is_numeric) return LITERAL;
 
-    // Otherwise, assume it's an identifier
-    return ID;
+    // Execute regex
+    result = regexec(&regex, text, 0, NULL, 0);
+    regfree(&regex);
+
+    if (!result) {
+        return DATE_PATTERN; // This is just an example. You can extend as needed.
+    }
+    return UNKNOWN;
 }
 
-// Lexer function to split and classify tokens
+// === Old Code Reference (Pattern Checking Logic) ===
+// Function from the old code that uses match_pattern to classify inputs based on regex patterns.
+void check_patterns(const char *input_text) {
+    const char *date_pattern = "([0-1][0-9])/([0-3][0-9])/([0-9]{2})";
+    const char *phone_pattern = "\\([0-9]{3}\\) [0-9]{3} [0-9]{4}";
+    const char *money_pattern = "^\\$[0-9]+(\\.[0-9]{2})?$";
+
+    if (match_pattern(date_pattern, input_text) == DATE_PATTERN) {
+        printf("DATE_PATTERN: %s\n", input_text);
+    } else if (match_pattern(phone_pattern, input_text) == PHONE_PATTERN) {
+        printf("PHONE_PATTERN: %s\n", input_text);
+    } else if (match_pattern(money_pattern, input_text) == MONEY_PATTERN) {
+        printf("MONEY_PATTERN: %s\n", input_text);
+    }
+}
+
+// === New Lexer Function ===
+// This is the new function to tokenize input into keywords, symbols, and literals. It complements the old pattern-matching logic.
 void lexer(const char *input_text) {
     char token[MAX_TOKEN_LENGTH];
     int index = 0;
@@ -97,12 +111,12 @@ void lexer(const char *input_text) {
     for (int i = 0; i < strlen(input_text); i++) {
         char c = input_text[i];
 
-        // Treat whitespace as token delimiters
+        // Treat whitespace (space, tab, newline) as token delimiters
         if (c == ' ' || c == '\n' || c == '\t') {
             if (index > 0) {
                 token[index] = '\0'; // Null-terminate the token
                 TokenType type = classify_token(token);
-                printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // Align output
+                printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // New formatted output
                 index = 0; // Reset token index
             }
         }
@@ -134,6 +148,7 @@ void lexer(const char *input_text) {
     }
 }
 
+// Main function integrates both the old and new logic
 int main() {
     char input_text[MAX_INPUT_SIZE] = {0};
     char buffer[200];
@@ -145,6 +160,11 @@ int main() {
         strcat(input_text, buffer); // Concatenate each line into input_text
     }
 
+    // === Old Code Reference ===
+    // First, check for specific patterns (date, phone, money) using the old logic
+    check_patterns(input_text);
+
+    // Call the new lexer to classify tokens
     lexer(input_text);
 
     return 0;
