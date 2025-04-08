@@ -89,7 +89,7 @@ TokenType classify_token(const char *token) {
     return ID;
 }
 
-// Lexer function
+// Lexer function to split and classify tokens
 void lexer(const char *input_text) {
     char token[MAX_TOKEN_LENGTH];
     int index = 0;
@@ -97,28 +97,30 @@ void lexer(const char *input_text) {
     for (int i = 0; i < strlen(input_text); i++) {
         char c = input_text[i];
 
-        // Treat whitespace (space, tab, newline) as token delimiters
+        // Treat whitespace as token delimiters
         if (c == ' ' || c == '\n' || c == '\t') {
             if (index > 0) {
                 token[index] = '\0'; // Null-terminate the token
                 TokenType type = classify_token(token);
-                printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // Align output with formatting
+                printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // Align output
                 index = 0; // Reset token index
             }
-        } else if (c == '=' || c == '<' || c == '>' || c == '!' ||
-                   c == '{' || c == '}' || c == '(' || c == ')' ||
-                   c == ';' || c == '+' || c == '-') {
+        }
+        // Check for single-character symbols or multi-character operators
+        else if (c == '=' || c == '<' || c == '>' || c == '!' ||
+                 c == '{' || c == '}' || c == '(' || c == ')' ||
+                 c == ';' || c == '+' || c == '-') {
             if (index > 0) {
                 token[index] = '\0'; // Null-terminate the token
                 TokenType type = classify_token(token);
-                printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // Align output with formatting
+                printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]);
                 index = 0; // Reset token index
             }
-            // Handle single-character tokens (e.g., symbols)
+            // Handle symbols or operators
             token[0] = c;
             token[1] = '\0';
             TokenType type = classify_token(token);
-            printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // Align output with formatting
+            printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]);
         } else {
             token[index++] = c; // Build token
         }
@@ -128,7 +130,7 @@ void lexer(const char *input_text) {
     if (index > 0) {
         token[index] = '\0';
         TokenType type = classify_token(token);
-        printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]); // Align output with formatting
+        printf("%-15s : %-15s\n", token, TOKEN_TYPE[type]);
     }
 }
 
